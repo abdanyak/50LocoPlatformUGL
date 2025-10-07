@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #D32F2F;
@@ -27,8 +27,11 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
-        .dashboard-container { display: flex; position: relative; }
-        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); transition: margin-left 0.3s ease-in-out; }
+        .dashboard-container { position: relative; }
+        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); transform: translateX(0); transition: transform 0.3s ease-in-out; }
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; background-color: var(--background-color); }
+        .sidebar-collapsed .sidebar { transform: translateX(-100%); }
+        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
         .sidebar-user { padding: 25px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
         .user-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; background-color: #f0f0f0; }
         .user-details .user-name { font-weight: 500; font-size: 0.95em; display: block; }
@@ -40,7 +43,6 @@
         .main-navigation ul li a:hover { background-color: var(--background-color); color: var(--secondary-color); }
         .main-navigation ul li.active > a { background-color: rgba(211, 47, 47, 0.1); color: var(--primary-color); }
         .main-navigation ul li a i { margin-right: 15px; width: 20px; text-align: center; font-size: 0.9em; }
-        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; }
         .topbar { background-color: var(--sidebar-bg); color: var(--text-color); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
         .header-left, .header-right { display: flex; align-items: center; }
         .menu-toggle { background: none; border: none; color: var(--text-color); font-size: 1.2em; cursor: pointer; margin-right: 15px; }
@@ -49,39 +51,77 @@
         .logout-btn { color: var(--text-color-light); transition: color 0.2s; cursor: pointer; }
         .logout-btn:hover { color: var(--primary-color); }
         .logout-btn i { margin-right: 5px; }
-        .content-wrapper { flex-grow: 1; padding: 30px; }
-        .page-header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 25px; color: var(--secondary-color); }
+        .content-wrapper { flex-grow: 1; }
+        .page-header { margin-bottom: 25px; }
+        .page-header h1 { font-size: 1.8em; font-weight: 700; color: var(--secondary-color); }
         .content-panel { background-color: var(--panel-bg); border-radius: 12px; box-shadow: var(--shadow); }
         .panel-body { padding: 25px; font-size: 1.05em; line-height: 1.7; }
-        .main-footer { padding: 20px 30px; font-size: 0.9em; color: var(--text-color-light); display: flex; justify-content: space-between; }
+        .main-footer { padding: 20px 30px; font-size: 0.9em; color: var(--text-color-light); display: flex; justify-content: space-between; background-color: var(--sidebar-bg); }
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; }
-        .hero-image, .feature-image { width: 100%; height: auto; border-radius: 8px; }
-        .content-panel h3 { color: var(--secondary-color); margin-bottom: 15px; }
-        .panel-body > *:not(h3) { margin-bottom: 25px; }
-        .panel-body > *:last-child { margin-bottom: 0; }
         .status-inspector { color: var(--status-inspector-color); }
         .status-guest { color: var(--status-guest-color); }
-
-        /* Style untuk state desktop collapsed (tidak berubah) */
-        .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #page-home.active { position: relative; width: 100%; height: calc(100vh - 70px); overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         
-        /* Style untuk state mobile open (tidak berubah) */
-        .sidebar-mobile-open .sidebar-overlay { display: block; }
+        /* == PERBAIKAN TATA RUANG ABOUT == */
+        #page-about { padding: 30px; }
 
+        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 2; }
+        .home-content { position: relative; z-index: 3; color: #FFFFFF; padding: 20px; max-width: 1100px; margin: auto; }
+        .home-content h1 { font-family: 'Montserrat', sans-serif; font-size: 4.5em; font-weight: 900; margin-bottom: 15px; text-shadow: 0 5px 15px rgba(0, 0, 0, 0.6); }
+        .home-content p { font-size: 1.5em; font-weight: 400; line-height: 1.6; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+
+        /* == PERBAIKAN JARAK KONTEN ABOUT == */
+        .panel-body .hero-image,
+        .panel-body .feature-image {
+            width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px;
+        }
+        .panel-body h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        .panel-body p {
+            margin-bottom: 25px;
+        }
+        .panel-body p:last-of-type {
+            margin-bottom: 0;
+        }
+        
+        /* == PERBAIKAN CSS VIDEO FULL SCREEN == */
+        .video-background-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        #youtube-player {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 177.77vh; /* 100vh * 16/9 */
+            height: 56.25vw; /* 100vw * 9/16 */
+            min-height: 100%;
+            min-width: 100%;
+            pointer-events: none;
+        }
+        /* == AKHIR PERBAIKAN == */
+        
         @media (max-width: 991.98px) {
-            /* Di mobile, sidebar disembunyikan di luar layar secara default */
-            .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-            .sidebar-mobile-open .sidebar { margin-left: 0; } /* Saat 'sidebar-mobile-open' aktif, sidebar muncul */
-
+            .sidebar { transform: translateX(-100%); }
+            .sidebar-mobile-open .sidebar { transform: translateX(0); }
+            .sidebar-mobile-open .sidebar-overlay { display: block; }
             .main-content { margin-left: 0; width: 100%; }
             .header-username { display: none; }
-            .content-wrapper { padding: 15px; }
+            #page-about { padding: 15px; }
             .page-header h1 { font-size: 1.5em; }
             .panel-body { padding: 15px; overflow-x: auto; }
-            /* Memastikan class desktop tidak berpengaruh di mobile */
-            .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-            .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
+            #page-home.active { height: calc(100vh - 70px); }
+            .home-content h1 { font-size: 2.5em; }
+            .home-content p { font-size: 1.1em; }
         }
     </style>
 </head>
@@ -102,7 +142,8 @@
             <nav class="main-navigation">
                 <p class="nav-title">Menu Utama</p>
                 <ul>
-                    <li class="active"><a href="#"><i class="fa-solid fa-house"></i> Home</a></li>
+                    <li class="active"><a href="#" class="nav-link" data-page="page-home"><i class="fa-solid fa-house"></i> Home</a></li>
+                    <li><a href="#" class="nav-link" data-page="page-about"><i class="fa-solid fa-circle-info"></i> About</a></li>
                 </ul>
             </nav>
         </aside>
@@ -119,8 +160,30 @@
             
             <main class="content-wrapper">
                 <div id="page-home" class="page-content active">
-                    <div class="page-header"><h1>Proyek 50 Lokomotif Platform C44ESACi EVO</h1></div>
-                    <div class="content-panel"><div class="panel-body"><img src="https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg" alt="Lokomotif UGL di Workshop INKA" class="hero-image"><h3>Latar Belakang Proyek</h3><p>Proyek ini merupakan wujud sinergi berkelanjutan antara <strong>PT INKA (Persero)</strong> dengan <strong>UGL Rail Service Pty Ltd</strong>, salah satu pemain utama di industri perkeretaapian Australia. Dalam kerja sama ini, PT INKA memegang peran vital untuk memproduksi dan mengekspor komponen inti berupa <strong><em>Locomotive Platform</em></strong>. Secara spesifik, komponen ini adalah struktur <strong><em>underframe</em></strong> (rangka bawah) yang dikirim tanpa instalasi <em>bogie</em> dan <em>coupler</em>. <em>Underframe</em> ini merupakan fondasi utama yang akan menjadi dasar bagi perakitan lokomotif canggih seri <strong>C44ESACi EVO</strong> di Australia. Keberhasilan dalam memproduksi komponen presisi tinggi ini membuktikan komitmen PT INKA dalam meningkatkan kualitas industri kereta api di pasar global dan memenuhi standar manufaktur kelas dunia.</p><img src="https://web-cms.inka.co.id/uploads/DSC_08666_5438ccccd6.jpg" alt="Lokomotif UGL Tampak Depan" class="feature-image"><h3>Dampak Strategis bagi Indonesia</h3><p>Keberhasilan ekspor ini memperkuat posisi Indonesia di pasar global sebagai negara produsen sarana perkeretaapian yang kompeten. Proyek ini tidak hanya meningkatkan devisa negara, tetapi juga mendorong transfer teknologi dan peningkatan kualitas sumber daya manusia di dalam negeri.</p></div></div>
+                    <div class="video-background-container">
+                        <div id="youtube-player"></div>
+                    </div>
+                    <div class="video-overlay"></div> 
+                    <div class="home-content">
+                        <h1>Selamat Datang, <span id="welcome_user_name"></span>!👋</h1>
+                        <p>Anda telah masuk ke dashboard Proyek 50 Lokomotif Platform C44ESACi EVO.</p>
+                    </div>
+                </div>
+
+                <div id="page-about" class="page-content">
+                     <div class="page-header">
+                         <h1>Tentang Proyek 50 Lokomotif Platform C44ESACi EVO</h1>
+                     </div>
+                     <div class="content-panel">
+                         <div class="panel-body">
+                             <img src="https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg" alt="Lokomotif UGL di Workshop INKA" class="hero-image">
+                             <h3>Latar Belakang Proyek</h3>
+                             <p>Proyek ini merupakan wujud sinergi berkelanjutan antara <strong>PT INKA (Persero)</strong> dengan <strong>UGL Rail Service Pty Ltd</strong>, salah satu pemain utama di industri perkeretaapian Australia. Dalam kerja sama ini, PT INKA memegang peran vital untuk memproduksi dan mengekspor komponen inti berupa <strong><em>Locomotive Platform</em></strong>. Secara spesifik, komponen ini adalah struktur <strong><em>underframe</em></strong> (rangka bawah) yang dikirim tanpa instalasi <em>bogie</em> dan <em>coupler</em>. <em>Underframe</em> ini merupakan fondasi utama yang akan menjadi dasar bagi perakitan lokomotif canggih seri <strong>C44ESACi EVO</strong> di Australia. Keberhasilan dalam memproduksi komponen presisi tinggi ini membuktikan komitmen PT INKA dalam meningkatkan kualitas industri kereta api di pasar global dan memenuhi standar manufaktur kelas dunia.</p>
+                             <img src="https://web-cms.inka.co.id/uploads/DSC_08666_5438ccccd6.jpg" alt="Lokomotif UGL Tampak Depan" class="feature-image">
+                             <h3>Dampak Strategis bagi Indonesia</h3>
+                             <p>Keberhasilan ekspor ini memperkuat posisi Indonesia di pasar global sebagai negara produsen sarana perkeretaapian yang kompeten. Proyek ini tidak hanya meningkatkan devisa negara, tetapi juga mendorong transfer teknologi dan peningkatan kualitas sumber daya manusia di dalam negeri.</p>
+                        </div>
+                    </div>
                 </div>
             </main>
 
@@ -131,72 +194,64 @@
         </div>
     </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                videoId: 'c4HZ6yft38M',
+                playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'loop': 1, 'playlist': 'c4HZ6yft38M', 'fs': 0, 'iv_load_policy': 3, 'mute': 1 },
+                events: { 'onReady': onPlayerReady }
+            });
+        }
+        function onPlayerReady(event) {
+            event.target.mute();
+            event.target.playVideo();
+        }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             if (!loggedInUser) {
                 window.location.href = 'index.html';
                 return;
             }
-
             document.getElementById('sidebar_user_name').textContent = loggedInUser.nama;
             document.getElementById('header_user_name').textContent = loggedInUser.nama;
-            
+            document.getElementById('welcome_user_name').textContent = loggedInUser.nama.split(' ')[0];
             const statusWrapper = document.getElementById('sidebar_user_status_wrapper');
             const statusText = document.getElementById('sidebar_user_status');
             statusText.textContent = loggedInUser.posisi;
-
             if (loggedInUser.posisi === 'Inspector') {
                 statusWrapper.classList.add('status-inspector');
             } else if (loggedInUser.posisi === 'Guest') {
                 statusWrapper.classList.add('status-guest');
             }
-
-            // == LOGIKA HAMBURGER MENU DIPERBAIKI DI SINI ==
+            const dashboardContainer = document.querySelector('.dashboard-container');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentPages = document.querySelectorAll('.page-content');
+            const allNavItems = document.querySelectorAll('.main-navigation ul li');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const targetPageId = this.dataset.page;
+                    contentPages.forEach(page => page.classList.remove('active'));
+                    document.getElementById(targetPageId).classList.add('active');
+                    allNavItems.forEach(item => item.classList.remove('active'));
+                    this.closest('li').classList.add('active');
+                    if (dashboardContainer.classList.contains('sidebar-mobile-open')) {
+                        dashboardContainer.classList.remove('sidebar-mobile-open');
+                    }
+                });
+            });
             const menuToggle = document.querySelector('.menu-toggle');
             const sidebarOverlay = document.querySelector('.sidebar-overlay');
-            const dashboardContainer = document.querySelector('.dashboard-container');
-            const mobileBreakpoint = 992; 
-
-            function handleMenuToggle() {
-                if (window.innerWidth < mobileBreakpoint) {
-                    // Perilaku Mobile: Tampilkan sidebar sebagai overlay
-                    dashboardContainer.classList.toggle('sidebar-mobile-open');
-                } else {
-                    // Perilaku Desktop: Geser konten
-                    dashboardContainer.classList.toggle('sidebar-collapsed');
-                }
-            }
-
-            if (menuToggle) {
-                menuToggle.addEventListener('click', handleMenuToggle);
-            }
-
-            // Fungsi untuk menutup sidebar saat overlay diklik (hanya di mobile)
-            if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', handleMenuToggle);
-            }
-            
-            // Anti-bug: Reset state saat mengubah ukuran jendela dari mobile ke desktop
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= mobileBreakpoint) {
-                    dashboardContainer.classList.remove('sidebar-mobile-open');
-                }
-            });
-            // == AKHIR PERBAIKAN HAMBURGER MENU ==
-
-
-            // --- Fungsi Logout (tidak berubah) ---
             const logoutButton = document.querySelector('.logout-btn');
-            if (logoutButton) {
-                logoutButton.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    localStorage.removeItem('loggedInUser');
-                    window.location.href = 'index.html';
-                });
-            }
+            const mobileBreakpoint = 992; 
+            function handleMenuToggle() { if (window.innerWidth < mobileBreakpoint) { dashboardContainer.classList.toggle('sidebar-mobile-open'); } else { dashboardContainer.classList.toggle('sidebar-collapsed'); } }
+            if (menuToggle) { menuToggle.addEventListener('click', handleMenuToggle); }
+            if (sidebarOverlay) { sidebarOverlay.addEventListener('click', handleMenuToggle); }
+            window.addEventListener('resize', () => { if (window.innerWidth >= mobileBreakpoint) { dashboardContainer.classList.remove('sidebar-mobile-open'); } });
+            if (logoutButton) { logoutButton.addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; }); }
         });
     </script>
 </body>

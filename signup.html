@@ -80,7 +80,7 @@
         const messageEl = document.getElementById('message');
 
         // PENTING: GANTI DENGAN URL WEB APP ANDA DARI PROSES DEPLOY TERBARU
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8OaYeimy36IPkOe5hgmmFnnVgVG3KrtXIHVqt490IBIDWBnzsTrzXlGY9CEXehsDyRA/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8OaYeimy36IPkOe5hgmmFnnVgVG3KrtXIHVqt490IBIDWBnzsTrzXlGY9CEXehsDyRA/exec";
 
         signupForm.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -90,6 +90,7 @@
             messageEl.style.display = 'none';
 
             const formData = {
+                action: 'signup', // Menandakan ini adalah aksi pendaftaran
                 nama: document.getElementById('nama').value,
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
