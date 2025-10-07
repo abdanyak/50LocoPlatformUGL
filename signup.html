@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Proyek Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #D32F2F;
+            --success-color: #28a745;
+            --panel-bg: #FFFFFF;
+            --text-color: #34495E;
+            --border-color: #E5E7EB;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; background-image: url('https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; padding: 20px; }
+        body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); z-index: 0; }
+        .signup-container { width: 100%; max-width: 420px; background-color: var(--panel-bg); padding: 40px; border-radius: 12px; box-shadow: var(--shadow); text-align: center; position: relative; z-index: 1; }
+        .signup-header { margin-bottom: 30px; }
+        .signup-header h1 { font-size: 1.5em; color: #2C3E50; margin-bottom: 5px; }
+        .signup-header p { color: #7F8C8D; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 8px; }
+        .form-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: 'Inter', sans-serif; font-size: 1em; }
+        .signup-btn { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 1em; transition: background-color 0.2s; }
+        .signup-btn:hover { background-color: #B71C1C; }
+        .signup-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .message { margin-top: 15px; font-size: 0.9em; display: none; }
+        .error-message { color: var(--primary-color); }
+        .success-message { color: var(--success-color); }
+        .login-link { margin-top: 20px; font-size: 0.9em; }
+        .login-link a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Buat Akun Baru</h1>
+            <p>Daftarkan akun untuk mengakses dashboard.</p>
+        </div>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="nama">Nama Lengkap</label>
+                <input type="text" id="nama" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+             <div class="form-group">
+                <label for="posisi">Posisi / Jabatan</label>
+                <input type="text" id="posisi" required>
+            </div>
+            <button type="submit" id="submitBtn" class="signup-btn">Daftar</button>
+            <p id="message" class="message"></p>
+        </form>
+        <div class="login-link">
+            Sudah punya akun? <a href="index.html">Login di sini</a>
+        </div>
+    </div>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageEl = document.getElementById('message');
+
+        // GANTI DENGAN URL WEB APP ANDA
+        const SCRIPT_URL = "URL_WEB_APP_ANDA_DI_SINI"; 
+
+        signupForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Nonaktifkan tombol saat proses berjalan
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Mendaftarkan...';
+            messageEl.style.display = 'none';
+
+            const formData = {
+                nama: document.getElementById('nama').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                posisi: document.getElementById('posisi').value,
+            };
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: JSON.stringify(formData),
+                });
+                const data = await response.json();
+                
+                messageEl.textContent = data.message;
+                if (data.success) {
+                    messageEl.className = 'message success-message';
+                    signupForm.reset();
+                } else {
+                    messageEl.className = 'message error-message';
+                }
+            } catch (error) {
+                 messageEl.textContent = 'Terjadi kesalahan koneksi.';
+                 messageEl.className = 'message error-message';
+            } finally {
+                messageEl.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Daftar';
+            }
+        });
+    </script>
+</body>
+</html>
