@@ -20,9 +20,8 @@
             --border-color: #E5E7EB;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
             --sidebar-width: 260px;
-            /* == WARNA STATUS BARU == */
-            --status-inspector-color: #D32F2F; /* Merah */
-            --status-guest-color: #10B981;   /* Hijau */
+            --status-inspector-color: #D32F2F;
+            --status-guest-color: #10B981;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); overflow-x: hidden; }
@@ -56,20 +55,34 @@
         .panel-body { padding: 25px; font-size: 1.05em; line-height: 1.7; }
         .main-footer { padding: 20px 30px; font-size: 0.9em; color: var(--text-color-light); display: flex; justify-content: space-between; }
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; }
-        .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
-        .sidebar-mobile-open .sidebar { margin-left: 0; }
-        .sidebar-mobile-open .sidebar-overlay { display: block; }
         .hero-image, .feature-image { width: 100%; height: auto; border-radius: 8px; }
         .content-panel h3 { color: var(--secondary-color); margin-bottom: 15px; }
         .panel-body > *:not(h3) { margin-bottom: 25px; }
         .panel-body > *:last-child { margin-bottom: 0; }
-        
-        /* == CSS BARU UNTUK PEWARNAAN STATUS == */
         .status-inspector { color: var(--status-inspector-color); }
         .status-guest { color: var(--status-guest-color); }
 
-        @media (max-width: 991.98px) { .sidebar { margin-left: calc(-1 * var(--sidebar-width)); } .main-content { margin-left: 0; width: 100%; } .header-username { display: none; } .content-wrapper { padding: 15px; } .page-header h1 { font-size: 1.5em; } .panel-body { padding: 15px; overflow-x: auto; } .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); } .sidebar-collapsed .main-content { margin-left: 0; width: 100%; } }
+        /* Style untuk state desktop collapsed (tidak berubah) */
+        .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
+        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
+        
+        /* Style untuk state mobile open (tidak berubah) */
+        .sidebar-mobile-open .sidebar-overlay { display: block; }
+
+        @media (max-width: 991.98px) {
+            /* Di mobile, sidebar disembunyikan di luar layar secara default */
+            .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
+            .sidebar-mobile-open .sidebar { margin-left: 0; } /* Saat 'sidebar-mobile-open' aktif, sidebar muncul */
+
+            .main-content { margin-left: 0; width: 100%; }
+            .header-username { display: none; }
+            .content-wrapper { padding: 15px; }
+            .page-header h1 { font-size: 1.5em; }
+            .panel-body { padding: 15px; overflow-x: auto; }
+            /* Memastikan class desktop tidak berpengaruh di mobile */
+            .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
+            .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -128,32 +141,52 @@
                 return;
             }
 
-            // Tampilkan data pengguna
             document.getElementById('sidebar_user_name').textContent = loggedInUser.nama;
             document.getElementById('header_user_name').textContent = loggedInUser.nama;
             
-            // == LOGIKA PEWARNAAN STATUS DI SINI ==
             const statusWrapper = document.getElementById('sidebar_user_status_wrapper');
             const statusText = document.getElementById('sidebar_user_status');
             statusText.textContent = loggedInUser.posisi;
 
-            // Terapkan class warna berdasarkan posisi
             if (loggedInUser.posisi === 'Inspector') {
                 statusWrapper.classList.add('status-inspector');
             } else if (loggedInUser.posisi === 'Guest') {
                 statusWrapper.classList.add('status-guest');
             }
-            // == AKHIR LOGIKA PEWARNAAN ==
 
-
-            // --- Fungsi untuk menu hamburger (tidak berubah) ---
+            // == LOGIKA HAMBURGER MENU DIPERBAIKI DI SINI ==
             const menuToggle = document.querySelector('.menu-toggle');
+            const sidebarOverlay = document.querySelector('.sidebar-overlay');
             const dashboardContainer = document.querySelector('.dashboard-container');
-            if (menuToggle) {
-                menuToggle.addEventListener('click', () => {
+            const mobileBreakpoint = 992; 
+
+            function handleMenuToggle() {
+                if (window.innerWidth < mobileBreakpoint) {
+                    // Perilaku Mobile: Tampilkan sidebar sebagai overlay
+                    dashboardContainer.classList.toggle('sidebar-mobile-open');
+                } else {
+                    // Perilaku Desktop: Geser konten
                     dashboardContainer.classList.toggle('sidebar-collapsed');
-                });
+                }
             }
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', handleMenuToggle);
+            }
+
+            // Fungsi untuk menutup sidebar saat overlay diklik (hanya di mobile)
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', handleMenuToggle);
+            }
+            
+            // Anti-bug: Reset state saat mengubah ukuran jendela dari mobile ke desktop
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= mobileBreakpoint) {
+                    dashboardContainer.classList.remove('sidebar-mobile-open');
+                }
+            });
+            // == AKHIR PERBAIKAN HAMBURGER MENU ==
+
 
             // --- Fungsi Logout (tidak berubah) ---
             const logoutButton = document.querySelector('.logout-btn');
