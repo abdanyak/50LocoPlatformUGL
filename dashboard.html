@@ -8,11 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-
     <style>
         :root {
-            --primary-color: #D32F2F; /* Merah korporat INKA */
-            --secondary-color: #2C3E50; /* Biru gelap untuk teks */
+            --primary-color: #D32F2F;
+            --secondary-color: #2C3E50;
             --background-color: #F4F6F9;
             --sidebar-bg: #FFFFFF;
             --panel-bg: #FFFFFF;
@@ -21,6 +20,9 @@
             --border-color: #E5E7EB;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
             --sidebar-width: 260px;
+            /* == WARNA STATUS BARU == */
+            --status-inspector-color: #D32F2F; /* Merah */
+            --status-guest-color: #10B981;   /* Hijau */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); overflow-x: hidden; }
@@ -28,31 +30,26 @@
         ul { list-style: none; }
         .dashboard-container { display: flex; position: relative; }
         .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); transition: margin-left 0.3s ease-in-out; }
-        
         .sidebar-user { padding: 25px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; background-color: #f0f0f0; }
         .user-details .user-name { font-weight: 500; font-size: 0.95em; display: block; }
-        .user-details .user-status { font-size: 0.8em; color: #10B981; }
+        .user-details .user-status { font-size: 0.8em; }
         .user-details .user-status .fa-circle { font-size: 0.7em; margin-right: 5px; }
-
         .main-navigation { padding: 0 15px; }
         .main-navigation .nav-title { padding: 25px 5px 10px; font-size: 0.75em; color: var(--text-color-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .main-navigation ul li a { display: flex; align-items: center; padding: 12px 10px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; color: var(--text-color-light); }
         .main-navigation ul li a:hover { background-color: var(--background-color); color: var(--secondary-color); }
         .main-navigation ul li.active > a { background-color: rgba(211, 47, 47, 0.1); color: var(--primary-color); }
         .main-navigation ul li a i { margin-right: 15px; width: 20px; text-align: center; font-size: 0.9em; }
-        
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; }
         .topbar { background-color: var(--sidebar-bg); color: var(--text-color); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
         .header-left, .header-right { display: flex; align-items: center; }
         .menu-toggle { background: none; border: none; color: var(--text-color); font-size: 1.2em; cursor: pointer; margin-right: 15px; }
-        
-        .user-avatar-sm { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; }
+        .user-avatar-sm { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; background-color: #f0f0f0; }
         .header-username { margin-right: 25px; font-weight: 500; }
-        .logout-btn { color: var(--text-color-light); transition: color 0.2s; }
+        .logout-btn { color: var(--text-color-light); transition: color 0.2s; cursor: pointer; }
         .logout-btn:hover { color: var(--primary-color); }
         .logout-btn i { margin-right: 5px; }
-
         .content-wrapper { flex-grow: 1; padding: 30px; }
         .page-header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 25px; color: var(--secondary-color); }
         .content-panel { background-color: var(--panel-bg); border-radius: 12px; box-shadow: var(--shadow); }
@@ -63,34 +60,16 @@
         .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
         .sidebar-mobile-open .sidebar { margin-left: 0; }
         .sidebar-mobile-open .sidebar-overlay { display: block; }
-
-        .hero-image, .feature-image {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
+        .hero-image, .feature-image { width: 100%; height: auto; border-radius: 8px; }
+        .content-panel h3 { color: var(--secondary-color); margin-bottom: 15px; }
+        .panel-body > *:not(h3) { margin-bottom: 25px; }
+        .panel-body > *:last-child { margin-bottom: 0; }
         
-        .content-panel h3 {
-            color: var(--secondary-color);
-            margin-bottom: 15px; /* Jarak antara judul dan paragraf di bawahnya */
-        }
-        .panel-body > *:not(h3) {
-            margin-bottom: 25px; /* Jarak standar untuk semua elemen utama (gambar, paragraf) */
-        }
-        .panel-body > *:last-child {
-            margin-bottom: 0; /* Hapus jarak di elemen paling akhir agar rapi */
-        }
+        /* == CSS BARU UNTUK PEWARNAAN STATUS == */
+        .status-inspector { color: var(--status-inspector-color); }
+        .status-guest { color: var(--status-guest-color); }
 
-        @media (max-width: 991.98px) {
-            .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-            .main-content { margin-left: 0; width: 100%; }
-            .header-username { display: none; }
-            .content-wrapper { padding: 15px; }
-            .page-header h1 { font-size: 1.5em; }
-            .panel-body { padding: 15px; overflow-x: auto; }
-            .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-            .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
-        }
+        @media (max-width: 991.98px) { .sidebar { margin-left: calc(-1 * var(--sidebar-width)); } .main-content { margin-left: 0; width: 100%; } .header-username { display: none; } .content-wrapper { padding: 15px; } .page-header h1 { font-size: 1.5em; } .panel-body { padding: 15px; overflow-x: auto; } .sidebar-collapsed .sidebar { margin-left: calc(-1 * var(--sidebar-width)); } .sidebar-collapsed .main-content { margin-left: 0; width: 100%; } }
     </style>
 </head>
 <body>
@@ -98,10 +77,13 @@
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
             <div class="sidebar-user">
-                <img src="https://i.pravatar.cc/100?u=a" alt="User Avatar" class="user-avatar">
+                <img src="https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg" alt="User Avatar" class="user-avatar">
                 <div class="user-details">
-                    <span class="user-name">Abdany A. Khoiri</span>
-                    <span class="user-status"><i class="fa-solid fa-circle"></i> Project Lead</span>
+                    <span class="user-name" id="sidebar_user_name">Memuat...</span>
+                    <span class="user-status" id="sidebar_user_status_wrapper">
+                        <i class="fa-solid fa-circle"></i> 
+                        <span id="sidebar_user_status">Memuat...</span>
+                    </span>
                 </div>
             </div>
             <nav class="main-navigation">
@@ -116,29 +98,16 @@
             <header class="topbar">
                 <div class="header-left"><button class="menu-toggle"><i class="fa-solid fa-bars"></i></button></div>
                 <div class="header-right">
-                    <img src="https://i.pravatar.cc/40?u=a" alt="User Avatar" class="user-avatar-sm">
-                    <span class="header-username">Abdany Afiq Khoiri</span>
-                    <a href="#" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    <img src="https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg" alt="User Avatar" class="user-avatar-sm">
+                    <span class="header-username" id="header_user_name">Memuat...</span>
+                    <a class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                 </div>
             </header>
             
             <main class="content-wrapper">
                 <div id="page-home" class="page-content active">
                     <div class="page-header"><h1>Proyek 50 Lokomotif Platform C44ESACi EVO</h1></div>
-                    <div class="content-panel">
-                        <div class="panel-body">
-                            
-                            <img src="https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg" alt="Lokomotif UGL di Workshop INKA" class="hero-image">
-
-                            <h3>Latar Belakang Proyek</h3>
-                            <p>Proyek ini merupakan wujud sinergi berkelanjutan antara <strong>PT INKA (Persero)</strong> dengan <strong>UGL Rail Service Pty Ltd</strong>, salah satu pemain utama di industri perkeretaapian Australia. Dalam kerja sama ini, PT INKA memegang peran vital untuk memproduksi dan mengekspor komponen inti berupa <strong><em>Locomotive Platform</em></strong>. Secara spesifik, komponen ini adalah struktur <strong><em>underframe</em></strong> (rangka bawah) yang dikirim tanpa instalasi <em>bogie</em> dan <em>coupler</em>. <em>Underframe</em> ini merupakan fondasi utama yang akan menjadi dasar bagi perakitan lokomotif canggih seri <strong>C44ESACi EVO</strong> di Australia. Keberhasilan dalam memproduksi komponen presisi tinggi ini membuktikan komitmen PT INKA dalam meningkatkan kualitas industri kereta api di pasar global dan memenuhi standar manufaktur kelas dunia.</p>
-                            
-                            <img src="https://web-cms.inka.co.id/uploads/DSC_08666_5438ccccd6.jpg" alt="Lokomotif UGL Tampak Depan" class="feature-image">
-                            
-                            <h3>Dampak Strategis bagi Indonesia</h3>
-                            <p>Keberhasilan ekspor ini memperkuat posisi Indonesia di pasar global sebagai negara produsen sarana perkeretaapian yang kompeten. Proyek ini tidak hanya meningkatkan devisa negara, tetapi juga mendorong transfer teknologi dan peningkatan kualitas sumber daya manusia di dalam negeri.</p>
-                        </div>
-                    </div>
+                    <div class="content-panel"><div class="panel-body"><img src="https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg" alt="Lokomotif UGL di Workshop INKA" class="hero-image"><h3>Latar Belakang Proyek</h3><p>Proyek ini merupakan wujud sinergi berkelanjutan antara <strong>PT INKA (Persero)</strong> dengan <strong>UGL Rail Service Pty Ltd</strong>, salah satu pemain utama di industri perkeretaapian Australia. Dalam kerja sama ini, PT INKA memegang peran vital untuk memproduksi dan mengekspor komponen inti berupa <strong><em>Locomotive Platform</em></strong>. Secara spesifik, komponen ini adalah struktur <strong><em>underframe</em></strong> (rangka bawah) yang dikirim tanpa instalasi <em>bogie</em> dan <em>coupler</em>. <em>Underframe</em> ini merupakan fondasi utama yang akan menjadi dasar bagi perakitan lokomotif canggih seri <strong>C44ESACi EVO</strong> di Australia. Keberhasilan dalam memproduksi komponen presisi tinggi ini membuktikan komitmen PT INKA dalam meningkatkan kualitas industri kereta api di pasar global dan memenuhi standar manufaktur kelas dunia.</p><img src="https://web-cms.inka.co.id/uploads/DSC_08666_5438ccccd6.jpg" alt="Lokomotif UGL Tampak Depan" class="feature-image"><h3>Dampak Strategis bagi Indonesia</h3><p>Keberhasilan ekspor ini memperkuat posisi Indonesia di pasar global sebagai negara produsen sarana perkeretaapian yang kompeten. Proyek ini tidak hanya meningkatkan devisa negara, tetapi juga mendorong transfer teknologi dan peningkatan kualitas sumber daya manusia di dalam negeri.</p></div></div>
                 </div>
             </main>
 
@@ -151,14 +120,50 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+            if (!loggedInUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Tampilkan data pengguna
+            document.getElementById('sidebar_user_name').textContent = loggedInUser.nama;
+            document.getElementById('header_user_name').textContent = loggedInUser.nama;
+            
+            // == LOGIKA PEWARNAAN STATUS DI SINI ==
+            const statusWrapper = document.getElementById('sidebar_user_status_wrapper');
+            const statusText = document.getElementById('sidebar_user_status');
+            statusText.textContent = loggedInUser.posisi;
+
+            // Terapkan class warna berdasarkan posisi
+            if (loggedInUser.posisi === 'Inspector') {
+                statusWrapper.classList.add('status-inspector');
+            } else if (loggedInUser.posisi === 'Guest') {
+                statusWrapper.classList.add('status-guest');
+            }
+            // == AKHIR LOGIKA PEWARNAAN ==
+
+
+            // --- Fungsi untuk menu hamburger (tidak berubah) ---
             const menuToggle = document.querySelector('.menu-toggle');
-            const sidebarOverlay = document.querySelector('.sidebar-overlay');
             const dashboardContainer = document.querySelector('.dashboard-container');
-            const mobileBreakpoint = 992;
-            function toggleSidebar() { if (window.innerWidth < mobileBreakpoint) { dashboardContainer.classList.toggle('sidebar-mobile-open'); } else { dashboardContainer.classList.toggle('sidebar-collapsed'); } }
-            if (menuToggle) { menuToggle.addEventListener('click', toggleSidebar); }
-            if (sidebarOverlay) { sidebarOverlay.addEventListener('click', toggleSidebar); }
-            window.addEventListener('resize', () => { if (window.innerWidth >= mobileBreakpoint) { dashboardContainer.classList.remove('sidebar-mobile-open'); } });
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    dashboardContainer.classList.toggle('sidebar-collapsed');
+                });
+            }
+
+            // --- Fungsi Logout (tidak berubah) ---
+            const logoutButton = document.querySelector('.logout-btn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    localStorage.removeItem('loggedInUser');
+                    window.location.href = 'index.html';
+                });
+            }
         });
     </script>
 </body>

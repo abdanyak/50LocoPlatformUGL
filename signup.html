@@ -25,15 +25,18 @@
         .signup-header p { color: #7F8C8D; }
         .form-group { text-align: left; margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 500; margin-bottom: 8px; }
-        .form-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: 'Inter', sans-serif; font-size: 1em; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: 'Inter', sans-serif; font-size: 1em; background-color: white; }
         .signup-btn { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 1em; transition: background-color 0.2s; }
-        .signup-btn:hover { background-color: #B71C1C; }
         .signup-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        .message { margin-top: 15px; font-size: 0.9em; display: none; }
-        .error-message { color: var(--primary-color); }
-        .success-message { color: var(--success-color); }
+        .message { margin-top: 15px; font-size: 0.9em; display: none; padding: 10px; border-radius: 5px; }
+        .error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .success-message { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
         .login-link { margin-top: 20px; font-size: 0.9em; }
         .login-link a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+
+        @media (max-width: 480px) {
+            .signup-container { padding: 30px; }
+        }
     </style>
 </head>
 <body>
@@ -57,7 +60,11 @@
             </div>
              <div class="form-group">
                 <label for="posisi">Posisi / Jabatan</label>
-                <input type="text" id="posisi" required>
+                <select id="posisi" required>
+                    <option value="" disabled selected>Pilih Posisi</option>
+                    <option value="Inspector">Inspector</option>
+                    <option value="Guest">Guest</option>
+                </select>
             </div>
             <button type="submit" id="submitBtn" class="signup-btn">Daftar</button>
             <p id="message" class="message"></p>
@@ -72,13 +79,12 @@
         const submitBtn = document.getElementById('submitBtn');
         const messageEl = document.getElementById('message');
 
-        // GANTI DENGAN URL WEB APP ANDA
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmSVqZxLArp6SObtUgh1lrFOD2bqgZCf9DwVQEMI_Ept5aFaPacYLaE74451C2eh-2/exec"; 
+        // PENTING: GANTI DENGAN URL WEB APP ANDA DARI PROSES DEPLOY TERBARU
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8OaYeimy36IPkOe5hgmmFnnVgVG3KrtXIHVqt490IBIDWBnzsTrzXlGY9CEXehsDyRA/exec"; 
 
         signupForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            // Nonaktifkan tombol saat proses berjalan
             submitBtn.disabled = true;
             submitBtn.textContent = 'Mendaftarkan...';
             messageEl.style.display = 'none';
@@ -96,6 +102,7 @@
                     mode: 'cors',
                     body: JSON.stringify(formData),
                 });
+                
                 const data = await response.json();
                 
                 messageEl.textContent = data.message;
@@ -106,7 +113,7 @@
                     messageEl.className = 'message error-message';
                 }
             } catch (error) {
-                 messageEl.textContent = 'Terjadi kesalahan koneksi.';
+                 messageEl.textContent = 'Terjadi kesalahan koneksi. Pastikan URL Web App sudah benar.';
                  messageEl.className = 'message error-message';
             } finally {
                 messageEl.style.display = 'block';
