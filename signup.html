@@ -10,38 +10,162 @@
     <style>
         :root {
             --primary-color: #D32F2F;
-            --success-color: #28a745;
             --panel-bg: #FFFFFF;
-            --text-color: #34495E;
+            --text-color-dark: #2C3E50;
+            --text-color-light: #7F8C8D;
             --border-color: #E5E7EB;
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; background-image: url('https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; padding: 20px; }
-        body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); z-index: 0; }
-        .signup-container { width: 100%; max-width: 420px; background-color: var(--panel-bg); padding: 40px; border-radius: 12px; box-shadow: var(--shadow); text-align: center; position: relative; z-index: 1; }
-        .signup-header { margin-bottom: 30px; }
-        .signup-header h1 { font-size: 1.5em; color: #2C3E50; margin-bottom: 5px; }
-        .signup-header p { color: #7F8C8D; }
-        .form-group { text-align: left; margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 500; margin-bottom: 8px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: 'Inter', sans-serif; font-size: 1em; background-color: white; }
-        .signup-btn { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 1em; transition: background-color 0.2s; }
-        .signup-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        .message { margin-top: 15px; font-size: 0.9em; display: none; padding: 10px; border-radius: 5px; }
-        .error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
-        .success-message { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .login-link { margin-top: 20px; font-size: 0.9em; }
-        .login-link a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
-
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            padding: 20px;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 0;
+        }
+        .logo-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            z-index: 10;
+        }
+        .logo-header .logo-left, .logo-header .logo-right {
+            display: flex;
+            align-items: center;
+        }
+        .logo-header .logo-left img {
+            height: 22px;
+            margin-right: 20px;
+            filter: brightness(0) invert(1);
+        }
+        .logo-header .logo-right img {
+            height: 35px;
+            filter: brightness(0) invert(1);
+        }
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--panel-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .form-header {
+            margin-bottom: 30px;
+        }
+        .form-header h1 {
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            margin-bottom: 5px;
+        }
+        .form-header p {
+            color: var(--text-color-light);
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            background-color: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+        }
+        .submit-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        .submit-btn:hover { background-color: #B71C1C; }
+        .submit-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .message {
+            margin-top: 15px;
+            font-size: 0.9em;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid transparent;
+        }
+        .error-message { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+        .success-message { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+        .alt-link {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .alt-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
         @media (max-width: 480px) {
-            .signup-container { padding: 30px; }
+            .logo-header { padding: 15px 20px; }
+            .logo-header .logo-left img { height: 18px; margin-right: 15px; }
+            .logo-header .logo-right img { height: 28px; }
+            .form-container { padding: 30px; box-shadow: none; }
+            .form-header h1 { font-size: 1.3em; }
         }
     </style>
 </head>
 <body>
-    <div class="signup-container">
-        <div class="signup-header">
+    <header class="logo-header">
+        <div class="logo-left">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
+        </div>
+        <div class="logo-right">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
+        </div>
+    </header>
+
+    <div class="form-container">
+        <div class="form-header">
             <h1>Buat Akun Baru</h1>
             <p>Daftarkan akun untuk mengakses dashboard.</p>
         </div>
@@ -61,15 +185,15 @@
              <div class="form-group">
                 <label for="posisi">Posisi / Jabatan</label>
                 <select id="posisi" required>
-                    <option value="" disabled selected>Pilih Posisi</option>
+                    <option value="" disabled selected>Pilih Posisi Anda</option>
                     <option value="Inspector">Inspector</option>
                     <option value="Guest">Guest</option>
                 </select>
             </div>
-            <button type="submit" id="submitBtn" class="signup-btn">Daftar</button>
+            <button type="submit" id="submitBtn" class="submit-btn">Daftar</button>
             <p id="message" class="message"></p>
         </form>
-        <div class="login-link">
+        <div class="alt-link">
             Sudah punya akun? <a href="index.html">Login di sini</a>
         </div>
     </div>
@@ -78,9 +202,7 @@
         const signupForm = document.getElementById('signupForm');
         const submitBtn = document.getElementById('submitBtn');
         const messageEl = document.getElementById('message');
-
-        // PENTING: GANTI DENGAN URL WEB APP ANDA DARI PROSES DEPLOY TERBARU
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8OaYeimy36IPkOe5hgmmFnnVgVG3KrtXIHVqt490IBIDWBnzsTrzXlGY9CEXehsDyRA/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8OaYeimy36IPkOe5hgmmFnnVgVG3KrtXIHVqt490IBIDWBnzsTrzXlGY9CEXehsDyRA/exec"; 
 
         signupForm.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -90,7 +212,7 @@
             messageEl.style.display = 'none';
 
             const formData = {
-                action: 'signup', // Menandakan ini adalah aksi pendaftaran
+                action: 'signup',
                 nama: document.getElementById('nama').value,
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
