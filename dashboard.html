@@ -109,6 +109,33 @@
             pointer-events: none;
         }
         /* == AKHIR PERBAIKAN == */
+        /* == CSS BARU UNTUK HALAMAN PENCARIAN == */
+        #page-drawing {
+            background-image: url('https://images.unsplash.com/photo-1558980892-7f985514f5c9?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .drawing-panel {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .drawing-header { text-align: center; margin-bottom: 20px; }
+        .drawing-header h1 { font-size: 2em; color: var(--secondary-color); }
+        .usage-btn { background-color: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; margin-top: 10px; font-size: 15px; }
+        .search-box { display: flex; gap: 10px; margin: 20px 0; }
+        .search-box input { flex-grow: 1; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 1em; }
+        .search-box button { background-color: var(--primary-color); color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; }
+        .drawing-table-container { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .data-table thead th { font-weight: 500; color: var(--text-color-light); }
+        .data-table a { color: var(--primary-color); font-weight: 500; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .loader { text-align: center; padding: 40px; }
+        .loader .fa-spinner { font-size: 2em; color: var(--primary-color); }
         
         @media (max-width: 991.98px) {
             .sidebar { transform: translateX(-100%); }
@@ -187,7 +214,48 @@
                     </div>
                 </div>
                 <div id="page-drawing" class="page-content">
-                    <h3>Drawing Search</h3>
+                    <div class="drawing-panel">
+                        <div class="drawing-header">
+                            <h1>Drawing Loco Platform UGL</h1>
+                            <button class="usage-btn"><i class="fa-solid fa-question-circle"></i> Petunjuk Penggunaan</button>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="drawingSearchInput" placeholder="Cari berdasarkan nama file atau REV...">
+                            <button id="drawingSearchBtn"><i class="fa-solid fa-search"></i> Cari</button>
+                        </div>
+                        <div class="drawing-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox"></th>
+                                        <th>Nama File</th>
+                                        <th>REV</th>
+                                        <th>Link PDF</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="drawingTableBody">
+                                    <tr>
+                                        <td><input type="checkbox"></td>
+                                        <td>LCA-064-00-R0256 - Platform P11-006 Draft Gear Pockets.pdf</td>
+                                        <td>R0256</td>
+                                        <td><a href="#">Buka File</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox"></td>
+                                        <td>A310-06229-S1-A - DRAFT GEAR POCKET WEB.pdf</td>
+                                        <td>A</td>
+                                        <td><a href="#">Buka File</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox"></td>
+                                        <td>P310-03447-S1-C - DRAFT GEAR POCKET WEB ASSEMBLY.pdf</td>
+                                        <td>C</td>
+                                        <td><a href="#">Buka File</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </main>
 
@@ -261,3 +329,4 @@
 </body>
 
 </html>
+
