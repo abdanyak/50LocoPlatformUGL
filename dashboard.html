@@ -109,31 +109,94 @@
             pointer-events: none;
         }
         /* == AKHIR PERBAIKAN == */
+        Tentu. Mari kita fokus menyempurnakan desain visual dari halaman "Pencarian Drawing" agar terlihat rapi, sejajar, dan minimalis seperti yang Anda inginkan.
+
+Saya akan melakukan beberapa penyesuaian pada HTML dan CSS di file dashboard.html untuk mencapai tampilan tersebut.
+
+Kode dashboard.html (Final dengan Desain Pencarian Rapi)
+Ganti seluruh isi file dashboard.html Anda dengan kode di bawah ini. Perubahan utama ada pada CSS dan sedikit pada struktur HTML di halaman #page-drawing.
+
+HTML
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Proyek 50 Lokomotif Platform C44ESACi EVO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #D32F2F; /* Mengembalikan warna merah */
+            --secondary-color: #2C3E50;
+            --background-color: #F4F6F9;
+            --sidebar-bg: #FFFFFF;
+            --panel-bg: #FFFFFF;
+            --text-color: #34495E;
+            --text-color-light: #7F8C8D;
+            --border-color: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --sidebar-width: 260px;
+            --status-inspector-color: #D32F2F;
+            --status-guest-color: #10B981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .dashboard-container { position: relative; }
+        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); transform: translateX(0); transition: transform 0.3s ease-in-out; }
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; }
+        .sidebar-collapsed .sidebar { transform: translateX(-100%); }
+        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
+        .sidebar-logos { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-logos .logo-left img { height: 18px; margin-right: 15px; }
+        .sidebar-logos .logo-right img { height: 28px; }
+        .sidebar-user { padding: 25px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; background-color: #f0f0f0; }
+        .user-details .user-name { font-weight: 500; font-size: 0.95em; display: block; }
+        .user-details .user-status { font-size: 0.8em; }
+        .user-details .user-status .fa-circle { font-size: 0.7em; margin-right: 5px; }
+        .main-navigation { padding: 0 15px; flex-grow: 1; overflow-y: auto; }
+        .main-navigation .nav-title { padding: 25px 5px 10px; font-size: 0.75em; color: var(--text-color-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .main-navigation ul li a { display: flex; align-items: center; padding: 12px 10px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; color: var(--text-color-light); }
+        .main-navigation ul li a:hover { background-color: #F4F6F9; color: var(--secondary-color); }
+        .main-navigation ul li.active > a { background-color: rgba(211, 47, 47, 0.1); color: var(--primary-color); }
+        .main-navigation ul li a i { margin-right: 15px; width: 20px; text-align: center; font-size: 0.9em; }
+        .topbar { background-color: var(--sidebar-bg); color: var(--text-color); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .header-left, .header-right { display: flex; align-items: center; }
+        .menu-toggle { background: none; border: none; color: var(--text-color); font-size: 1.2em; cursor: pointer; margin-right: 15px; }
+        .user-avatar-sm { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; background-color: #f0f0f0; }
+        .header-username { margin-right: 25px; font-weight: 500; }
+        .logout-btn { color: var(--text-color-light); transition: color 0.2s; cursor: pointer; }
+        .logout-btn:hover { color: var(--primary-color); }
+        .logout-btn i { margin-right: 5px; }
+        .content-wrapper { flex-grow: 1; }
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #page-home, #page-about, #page-drawing { height: calc(100vh - 70px); overflow-y: auto; }
+        #page-about, #page-drawing { padding: 30px; }
+        #page-home.active { position: relative; width: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+        
         /* == CSS BARU UNTUK HALAMAN PENCARIAN == */
-        #page-drawing {
-            background-image: url('https://images.unsplash.com/photo-1558980892-7f985514f5c9?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-        }
-        .drawing-panel {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .drawing-header { text-align: center; margin-bottom: 20px; }
-        .drawing-header h1 { font-size: 2em; color: var(--secondary-color); }
-        .usage-btn { background-color: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; margin-top: 10px; font-size: 15px; }
-        .search-box { display: flex; gap: 10px; margin: 20px 0; }
+        .drawing-header { text-align: center; margin-bottom: 10px; }
+        .drawing-header h1 { font-size: 2em; color: var(--secondary-color); margin-bottom: 15px; }
+        .usage-btn { background-color: #007BFF; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+        .search-box { display: flex; gap: 10px; margin: 25px 0; }
         .search-box input { flex-grow: 1; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 1em; }
         .search-box button { background-color: var(--primary-color); color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; }
-        .drawing-table-container { overflow-x: auto; }
+        .drawing-table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 12px; background-color: var(--panel-bg); }
         .data-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        .data-table thead th { font-weight: 500; color: var(--text-color-light); }
-        .data-table a { color: var(--primary-color); font-weight: 500; }
-        .data-table tr:last-child td { border-bottom: none; }
+        .data-table th, .data-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .data-table thead th { font-weight: 500; color: var(--text-color-light); background-color: #F9FAFB; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table a { color: var(--primary-color); font-weight: 500; text-decoration: none; }
+        .data-table a:hover { text-decoration: underline; }
+        .data-table input[type="checkbox"] { width: 18px; height: 18px; }
         .loader { text-align: center; padding: 40px; }
         .loader .fa-spinner { font-size: 2em; color: var(--primary-color); }
         
@@ -214,49 +277,48 @@
                     </div>
                 </div>
                 <div id="page-drawing" class="page-content">
-                    <div class="drawing-panel">
-                        <div class="drawing-header">
-                            <h1>Drawing Loco Platform UGL</h1>
-                            <button class="usage-btn"><i class="fa-solid fa-question-circle"></i> Petunjuk Penggunaan</button>
-                        </div>
-                        <div class="search-box">
-                            <input type="text" id="drawingSearchInput" placeholder="Cari berdasarkan nama file atau REV...">
-                            <button id="drawingSearchBtn"><i class="fa-solid fa-search"></i> Cari</button>
-                        </div>
-                        <div class="drawing-table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox"></th>
-                                        <th>Nama File</th>
-                                        <th>REV</th>
-                                        <th>Link PDF</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="drawingTableBody">
-                                    <tr>
-                                        <td><input type="checkbox"></td>
-                                        <td>LCA-064-00-R0256 - Platform P11-006 Draft Gear Pockets.pdf</td>
-                                        <td>R0256</td>
-                                        <td><a href="#">Buka File</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox"></td>
-                                        <td>A310-06229-S1-A - DRAFT GEAR POCKET WEB.pdf</td>
-                                        <td>A</td>
-                                        <td><a href="#">Buka File</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox"></td>
-                                        <td>P310-03447-S1-C - DRAFT GEAR POCKET WEB ASSEMBLY.pdf</td>
-                                        <td>C</td>
-                                        <td><a href="#">Buka File</a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="drawing-header">
+                        <h1>Drawing Loco Platform UGL</h1>
+                        <button class="usage-btn"><i class="fa-solid fa-question-circle"></i> Petunjuk Penggunaan</button>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="drawingSearchInput" placeholder="Cari berdasarkan nama file atau REV...">
+                        <button id="drawingSearchBtn"><i class="fa-solid fa-search"></i> Cari</button>
+                    </div>
+                    <div class="drawing-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox"></th>
+                                    <th>Nama File</th>
+                                    <th>REV</th>
+                                    <th>Link PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drawingTableBody">
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>LCA-064-00-R0256 - Platform P11-006 Draft Gear Pockets.pdf</td>
+                                    <td>R0256</td>
+                                    <td><a href="#">Buka File</a></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>A310-06229-S1-A - DRAFT GEAR POCKET WEB.pdf</td>
+                                    <td>A</td>
+                                    <td><a href="#">Buka File</a></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>P310-03447-S1-C - DRAFT GEAR POCKET WEB ASSEMBLY.pdf</td>
+                                    <td>C</td>
+                                    <td><a href="#">Buka File</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
             </main>
 
             <footer class="main-footer">
@@ -329,4 +391,5 @@
 </body>
 
 </html>
+
 
