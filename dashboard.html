@@ -108,79 +108,6 @@
             min-width: 100%;
             pointer-events: none;
         }
-        /* == AKHIR PERBAIKAN == */
-        Tentu. Mari kita fokus menyempurnakan desain visual dari halaman "Pencarian Drawing" agar terlihat rapi, sejajar, dan minimalis seperti yang Anda inginkan.
-
-Saya akan melakukan beberapa penyesuaian pada HTML dan CSS di file dashboard.html untuk mencapai tampilan tersebut.
-
-Kode dashboard.html (Final dengan Desain Pencarian Rapi)
-Ganti seluruh isi file dashboard.html Anda dengan kode di bawah ini. Perubahan utama ada pada CSS dan sedikit pada struktur HTML di halaman #page-drawing.
-
-HTML
-
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Proyek 50 Lokomotif Platform C44ESACi EVO</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #D32F2F; /* Mengembalikan warna merah */
-            --secondary-color: #2C3E50;
-            --background-color: #F4F6F9;
-            --sidebar-bg: #FFFFFF;
-            --panel-bg: #FFFFFF;
-            --text-color: #34495E;
-            --text-color-light: #7F8C8D;
-            --border-color: #E5E7EB;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-            --sidebar-width: 260px;
-            --status-inspector-color: #D32F2F;
-            --status-guest-color: #10B981;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); overflow-x: hidden; }
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
-        .dashboard-container { position: relative; }
-        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); transform: translateX(0); transition: transform 0.3s ease-in-out; }
-        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; }
-        .sidebar-collapsed .sidebar { transform: translateX(-100%); }
-        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
-        .sidebar-logos { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
-        .sidebar-logos .logo-left img { height: 18px; margin-right: 15px; }
-        .sidebar-logos .logo-right img { height: 28px; }
-        .sidebar-user { padding: 25px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; background-color: #f0f0f0; }
-        .user-details .user-name { font-weight: 500; font-size: 0.95em; display: block; }
-        .user-details .user-status { font-size: 0.8em; }
-        .user-details .user-status .fa-circle { font-size: 0.7em; margin-right: 5px; }
-        .main-navigation { padding: 0 15px; flex-grow: 1; overflow-y: auto; }
-        .main-navigation .nav-title { padding: 25px 5px 10px; font-size: 0.75em; color: var(--text-color-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .main-navigation ul li a { display: flex; align-items: center; padding: 12px 10px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; color: var(--text-color-light); }
-        .main-navigation ul li a:hover { background-color: #F4F6F9; color: var(--secondary-color); }
-        .main-navigation ul li.active > a { background-color: rgba(211, 47, 47, 0.1); color: var(--primary-color); }
-        .main-navigation ul li a i { margin-right: 15px; width: 20px; text-align: center; font-size: 0.9em; }
-        .topbar { background-color: var(--sidebar-bg); color: var(--text-color); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
-        .header-left, .header-right { display: flex; align-items: center; }
-        .menu-toggle { background: none; border: none; color: var(--text-color); font-size: 1.2em; cursor: pointer; margin-right: 15px; }
-        .user-avatar-sm { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; background-color: #f0f0f0; }
-        .header-username { margin-right: 25px; font-weight: 500; }
-        .logout-btn { color: var(--text-color-light); transition: color 0.2s; cursor: pointer; }
-        .logout-btn:hover { color: var(--primary-color); }
-        .logout-btn i { margin-right: 5px; }
-        .content-wrapper { flex-grow: 1; }
-        .page-content { display: none; }
-        .page-content.active { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #page-home, #page-about, #page-drawing { height: calc(100vh - 70px); overflow-y: auto; }
-        #page-about, #page-drawing { padding: 30px; }
-        #page-home.active { position: relative; width: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         
         /* == CSS BARU UNTUK HALAMAN PENCARIAN == */
         .drawing-header { text-align: center; margin-bottom: 10px; }
@@ -391,5 +318,6 @@ HTML
 </body>
 
 </html>
+
 
 
