@@ -8,10 +8,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        /* ==================================
+           1. VARIABLES & GLOBAL STYLES
+           ================================== */
         :root {
             --primary-color: #D32F2F;
             --secondary-color: #2C3E50;
+            --blue-color: #007BFF;
+            --blue-color-dark: #0056b3;
             --background-color: #F4F6F9;
             --sidebar-bg: #FFFFFF;
             --panel-bg: #FFFFFF;
@@ -27,22 +33,36 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--background-color); color: var(--text-color); overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
+
+        /* ==================================
+           2. MAIN LAYOUT & STATES
+           ================================== */
         .dashboard-container { position: relative; }
         .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); transform: translateX(0); transition: transform 0.3s ease-in-out; }
-        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; background-color: var(--background-color); }
+        .main-content { margin-left: var(--sidebar-width); display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.3s ease-in-out; width: auto; }
         .sidebar-collapsed .sidebar { transform: translateX(-100%); }
-        .sidebar-collapsed .main-content { margin-left: 0; width: 100%; }
+        .sidebar-collapsed .main-content { margin-left: 0; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; }
+
+        /* ==================================
+           3. SIDEBAR & TOPBAR COMPONENTS
+           ================================== */
+        .sidebar-logos { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-logos .logo-left img { height: 18px; margin-right: 15px; }
+        .sidebar-logos .logo-right img { height: 28px; }
         .sidebar-user { padding: 25px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
         .user-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; background-color: #f0f0f0; }
         .user-details .user-name { font-weight: 500; font-size: 0.95em; display: block; }
         .user-details .user-status { font-size: 0.8em; }
         .user-details .user-status .fa-circle { font-size: 0.7em; margin-right: 5px; }
-        .main-navigation { padding: 0 15px; }
+        .main-navigation { padding: 0 15px; flex-grow: 1; overflow-y: auto; }
         .main-navigation .nav-title { padding: 25px 5px 10px; font-size: 0.75em; color: var(--text-color-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .main-navigation ul li a { display: flex; align-items: center; padding: 12px 10px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s; color: var(--text-color-light); }
         .main-navigation ul li a:hover { background-color: var(--background-color); color: var(--secondary-color); }
         .main-navigation ul li.active > a { background-color: rgba(211, 47, 47, 0.1); color: var(--primary-color); }
         .main-navigation ul li a i { margin-right: 15px; width: 20px; text-align: center; font-size: 0.9em; }
+        .status-inspector { color: var(--status-inspector-color); }
+        .status-guest { color: var(--status-guest-color); }
         .topbar { background-color: var(--sidebar-bg); color: var(--text-color); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
         .header-left, .header-right { display: flex; align-items: center; }
         .menu-toggle { background: none; border: none; color: var(--text-color); font-size: 1.2em; cursor: pointer; margin-right: 15px; }
@@ -51,94 +71,120 @@
         .logout-btn { color: var(--text-color-light); transition: color 0.2s; cursor: pointer; }
         .logout-btn:hover { color: var(--primary-color); }
         .logout-btn i { margin-right: 5px; }
+
+        /* ==================================
+           4. CONTENT AREA & PAGES
+           ================================== */
         .content-wrapper { flex-grow: 1; }
-        .page-header { margin-bottom: 25px; }
-        .page-header h1 { font-size: 1.8em; font-weight: 700; color: var(--secondary-color); }
-        .content-panel { background-color: var(--panel-bg); border-radius: 12px; box-shadow: var(--shadow); }
-        .panel-body { padding: 25px; font-size: 1.05em; line-height: 1.7; }
-        .main-footer { padding: 20px 30px; font-size: 0.9em; color: var(--text-color-light); display: flex; justify-content: space-between; background-color: var(--sidebar-bg); }
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; }
-        .status-inspector { color: var(--status-inspector-color); }
-        .status-guest { color: var(--status-guest-color); }
         .page-content { display: none; }
         .page-content.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #page-home.active { position: relative; width: 100%; height: calc(100vh - 70px); overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
-        
-        /* == PERBAIKAN TATA RUANG ABOUT == */
+        .page-header h1 { font-size: 1.8em; font-weight: 700; color: var(--secondary-color); }
+        #page-home, #page-about, #page-drawing { height: calc(100vh - 70px); overflow-y: auto; }
         #page-about { padding: 30px; }
-
+        #page-home.active { position: relative; width: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .video-background-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
+        #youtube-player { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 177.77vh; height: 56.25vw; min-height: 100%; min-width: 100%; pointer-events: none; }
         .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 2; }
         .home-content { position: relative; z-index: 3; color: #FFFFFF; padding: 20px; max-width: 1100px; margin: auto; }
         .home-content h1 { font-family: 'Montserrat', sans-serif; font-size: 4.5em; font-weight: 900; margin-bottom: 15px; text-shadow: 0 5px 15px rgba(0, 0, 0, 0.6); }
         .home-content p { font-size: 1.5em; font-weight: 400; line-height: 1.6; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+        .content-panel { background-color: var(--panel-bg); border-radius: 12px; box-shadow: var(--shadow); }
+        .panel-body { padding: 25px; font-size: 1.05em; line-height: 1.7; }
+        .panel-body .hero-image, .panel-body .feature-image { width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px; }
+        .panel-body h3 { color: var(--secondary-color); margin-bottom: 15px; }
+        .panel-body p { margin-bottom: 25px; }
+        .panel-body p:last-of-type { margin-bottom: 0; }
 
-        /* == PERBAIKAN JARAK KONTEN ABOUT == */
-        .panel-body .hero-image,
-        .panel-body .feature-image {
-            width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px;
-        }
-        .panel-body h3 {
-            color: var(--secondary-color);
-            margin-bottom: 15px;
-        }
-        .panel-body p {
-            margin-bottom: 25px;
-        }
-        .panel-body p:last-of-type {
-            margin-bottom: 0;
-        }
-        
-        /* == PERBAIKAN CSS VIDEO FULL SCREEN == */
-        .video-background-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-        #youtube-player {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 177.77vh; /* 100vh * 16/9 */
-            height: 56.25vw; /* 100vw * 9/16 */
-            min-height: 100%;
-            min-width: 100%;
-            pointer-events: none;
-        }
-        
-        /* == CSS BARU UNTUK HALAMAN PENCARIAN == */
-        .drawing-header { text-align: center; margin-bottom: 10px; }
-        .drawing-header h1 { font-size: 2em; color: var(--secondary-color); margin-bottom: 15px; }
-        .usage-btn { background-color: #007BFF; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+        /* ==================================
+           5. DRAWING SEARCH PAGE STYLES (PERFECTED)
+           ================================== */
+        #page-drawing { background-color: transparent; padding: 30px; }
+        .drawing-panel { background-color: var(--panel-bg); border-radius: 12px; padding: 30px; box-shadow: var(--shadow); }
+        .drawing-header { text-align: center; margin-bottom: 20px; }
+        .drawing-header h1 { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 2em; color: var(--secondary-color); }
+        .usage-btn { background-color: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; margin-top: 10px; font-size: 15px; transition: background-color 0.2s; }
+        .usage-btn:hover { background-color: #138496; }
         .search-box { display: flex; gap: 10px; margin: 25px 0; }
         .search-box input { flex-grow: 1; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 1em; }
-        .search-box button { background-color: var(--primary-color); color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; }
-        .drawing-table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 12px; background-color: var(--panel-bg); }
+        .search-box input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+        .search-box button { background-color: var(--blue-color); color: white; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; font-size: 1em; transition: background-color 0.2s; }
+        .search-box button:hover { background-color: var(--blue-color-dark); }
+        #loading-status { text-align: center; font-weight: 500; margin: 40px 0; font-size: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; color: var(--text-color-light); }
+        .loader-bar { width: 100px; height: 4px; background-color: var(--border-color); border-radius: 2px; overflow: hidden; }
+        .loader-bar::before { content: ''; display: block; width: 40%; height: 100%; background-color: var(--blue-color); border-radius: 2px; animation: loading-bar-animation 1.5s infinite; }
+        @keyframes loading-bar-animation { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+        .drawing-table-container { overflow-x: auto; margin-bottom: 20px; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        .data-table th, .data-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        .data-table thead th { font-weight: 500; color: var(--text-color-light); background-color: #F9FAFB; }
-        .data-table tbody tr:last-child td { border-bottom: none; }
-        .data-table a { color: var(--primary-color); font-weight: 500; text-decoration: none; }
-        .data-table a:hover { text-decoration: underline; }
-        .data-table input[type="checkbox"] { width: 18px; height: 18px; }
-        .loader { text-align: center; padding: 40px; }
-        .loader .fa-spinner { font-size: 2em; color: var(--primary-color); }
-        
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .data-table td:nth-child(2) { white-space: normal; word-break: break-all; min-width: 250px; }
+        .data-table thead th { font-weight: 500; text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.5px; color: var(--text-color-light); background-color: #f8f9fa; white-space: nowrap; }
+        .data-table tbody tr:hover { background-color: #f8f9fa; }
+        .data-table a { color: var(--blue-color); font-weight: 500; }
+        .data-table th.sortable { cursor: pointer; user-select: none; }
+        .data-table th.sortable:hover { background-color: #e9ecef; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .custom-checkbox { position: relative; display: inline-block; width: 18px; height: 18px; }
+        .custom-checkbox input { opacity: 0; width: 0; height: 0; }
+        .custom-checkbox label { position: absolute; top: 0; left: 0; width: 18px; height: 18px; background-color: #eee; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; }
+        .custom-checkbox input:checked + label { background-color: var(--blue-color); border-color: var(--blue-color); }
+        .custom-checkbox input:checked + label::after { content: '✔'; color: white; font-size: 12px; position: absolute; top: 1px; left: 3px; }
+        #selectedFilesContainer { margin-bottom: 30px; display: none; }
+        #selectedFilesContainer h3 { margin-bottom: 15px; padding: 20px 20px 0; font-size: 1.2em; color: var(--secondary-color); }
+        .export-area { text-align: center; margin-top: 20px; display: none; }
+        .export-btn { background-color: #28a745; color: white; font-size: 16px; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; }
+        .popup-content { background-color: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 10px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .close-btn { position: absolute; top: 12px; right: 16px; font-size: 20px; cursor: pointer; color: #555; }
+
+        /* ==================================
+           6. FOOTER
+           ================================== */
+        .main-footer { padding: 20px 30px; font-size: 0.9em; color: var(--text-color-light); display: flex; justify-content: space-between; background-color: var(--sidebar-bg); }
+
+        /* ==================================
+           7. RESPONSIVE DESIGN
+           ================================== */
         @media (max-width: 991.98px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar-mobile-open .sidebar { transform: translateX(0); }
             .sidebar-mobile-open .sidebar-overlay { display: block; }
-            .main-content { margin-left: 0; width: 100%; }
+            .main-content { margin-left: 0; }
             .header-username { display: none; }
-            #page-about { padding: 15px; }
-            .page-header h1 { font-size: 1.5em; }
-            .panel-body { padding: 15px; overflow-x: auto; }
-            #page-home.active { height: calc(100vh - 70px); }
+            #page-about, #page-drawing { padding: 15px; }
             .home-content h1 { font-size: 2.5em; }
             .home-content p { font-size: 1.1em; }
+            
+            .drawing-table-container { border: none; }
+            .data-table thead { display: none; }
+            .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+            .data-table tr { 
+                margin-bottom: 15px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background-color: var(--panel-bg);
+            }
+            .data-table td {
+                text-align: right;
+                position: relative;
+                padding-left: 50%;
+                border-bottom: 1px dotted var(--border-color);
+            }
+            .data-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                width: calc(50% - 30px);
+                text-align: left;
+                font-weight: 500;
+                color: var(--secondary-color);
+            }
+            .data-table td:last-child {
+                border-bottom: none;
+            }
+            #selectedFilesContainer .data-table td:before { display: none; }
+            #selectedFilesContainer .data-table td { text-align: left; padding-left: 15px; display: table-cell; }
+            #selectedFilesContainer .data-table tr { display: table-row; border: none; margin-bottom: 0; background: none; }
         }
     </style>
 </head>
@@ -146,26 +192,26 @@
     <div class="dashboard-container">
         <div class="sidebar-overlay"></div>
         <aside class="sidebar">
+            <div class="sidebar-logos">
+                <div class="logo-left"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL"></div>
+                <div class="logo-right"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA"></div>
+            </div>
             <div class="sidebar-user">
                 <img src="https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg" alt="User Avatar" class="user-avatar">
                 <div class="user-details">
                     <span class="user-name" id="sidebar_user_name">Memuat...</span>
-                    <span class="user-status" id="sidebar_user_status_wrapper">
-                        <i class="fa-solid fa-circle"></i> 
-                        <span id="sidebar_user_status">Memuat...</span>
-                    </span>
+                    <span class="user-status" id="sidebar_user_status_wrapper"><i class="fa-solid fa-circle"></i> <span id="sidebar_user_status">Memuat...</span></span>
                 </div>
             </div>
             <nav class="main-navigation">
                 <p class="nav-title">Menu Utama</p>
                 <ul>
                     <li class="active"><a href="#" class="nav-link" data-page="page-home"><i class="fa-solid fa-house"></i> Home</a></li>
-                    <li><a href="#" class="nav-link" data-page="page-about"><i class="fa-solid fa-circle-info"></i> About Project</a></li>
+                    <li><a href="#" class="nav-link" data-page="page-about"><i class="fa-solid fa-circle-info"></i> About</a></li>
                     <li><a href="#" class="nav-link" data-page="page-drawing"><i class="fa-solid fa-magnifying-glass"></i> Pencarian Drawing</a></li>
                 </ul>
             </nav>
         </aside>
-
         <div class="main-content">
             <header class="topbar">
                 <div class="header-left"><button class="menu-toggle"><i class="fa-solid fa-bars"></i></button></div>
@@ -175,88 +221,74 @@
                     <a class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                 </div>
             </header>
-            
             <main class="content-wrapper">
                 <div id="page-home" class="page-content active">
-                    <div class="video-background-container">
-                        <div id="youtube-player"></div>
-                    </div>
+                    <div class="video-background-container"><div id="youtube-player"></div></div>
                     <div class="video-overlay"></div> 
                     <div class="home-content">
                         <h1>Selamat Datang, <span id="welcome_user_name"></span>!</h1>
                         <p>Anda telah masuk ke dashboard Proyek 50 Lokomotif Platform C44ESACi EVO.</p>
                     </div>
                 </div>
-
                 <div id="page-about" class="page-content">
-                     <div class="page-header">
-                         <h1>Tentang Proyek 50 Lokomotif Platform C44ESACi EVO</h1>
-                     </div>
-                     <div class="content-panel">
-                         <div class="panel-body">
-                             <img src="https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg" alt="Lokomotif UGL di Workshop INKA" class="hero-image">
-                             <h3>Latar Belakang Proyek</h3>
-                             <p>Proyek ini merupakan wujud sinergi berkelanjutan antara <strong>PT INKA (Persero)</strong> dengan <strong>UGL Rail Service Pty Ltd</strong>, salah satu pemain utama di industri perkeretaapian Australia. Dalam kerja sama ini, PT INKA memegang peran vital untuk memproduksi dan mengekspor komponen inti berupa <strong><em>Locomotive Platform</em></strong>. Secara spesifik, komponen ini adalah struktur <strong><em>underframe</em></strong> (rangka bawah) yang dikirim tanpa instalasi <em>bogie</em> dan <em>coupler</em>. <em>Underframe</em> ini merupakan fondasi utama yang akan menjadi dasar bagi perakitan lokomotif canggih seri <strong>C44ESACi EVO</strong> di Australia. Keberhasilan dalam memproduksi komponen presisi tinggi ini membuktikan komitmen PT INKA dalam meningkatkan kualitas industri kereta api di pasar global dan memenuhi standar manufaktur kelas dunia.</p>
-                             <img src="https://web-cms.inka.co.id/uploads/DSC_08666_5438ccccd6.jpg" alt="Lokomotif UGL Tampak Depan" class="feature-image">
-                             <h3>Dampak Strategis bagi Indonesia</h3>
-                             <p>Keberhasilan ekspor ini memperkuat posisi Indonesia di pasar global sebagai negara produsen sarana perkeretaapian yang kompeten. Proyek ini tidak hanya meningkatkan devisa negara, tetapi juga mendorong transfer teknologi dan peningkatan kualitas sumber daya manusia di dalam negeri.</p>
-                        </div>
-                    </div>
+                    <div class="page-header"><h1>Tentang Proyek 50 Lokomotif Platform C44ESACi EVO</h1></div>
+                    <div class="content-panel"><div class="panel-body"><img src="https://web-cms.inka.co.id/uploads/DSC_08639_19db0ee095.jpg" alt="Lokomotif UGL di Workshop INKA" class="hero-image"><h3>Latar Belakang Proyek</h3><p>Proyek ini merupakan wujud sinergi berkelanjutan antara <strong>PT INKA (Persero)</strong> dengan <strong>UGL Rail Service Pty Ltd</strong>, salah satu pemain utama di industri perkeretaapian Australia. Dalam kerja sama ini, PT INKA memegang peran vital untuk memproduksi dan mengekspor komponen inti berupa <strong><em>Locomotive Platform</em></strong>. Secara spesifik, komponen ini adalah struktur <strong><em>underframe</em></strong> (rangka bawah) yang dikirim tanpa instalasi <em>bogie</em> dan <em>coupler</em>. <em>Underframe</em> ini merupakan fondasi utama yang akan menjadi dasar bagi perakitan lokomotif canggih seri <strong>C44ESACi EVO</strong> di Australia. Keberhasilan dalam memproduksi komponen presisi tinggi ini membuktikan komitmen PT INKA dalam meningkatkan kualitas industri kereta api di pasar global dan memenuhi standar manufaktur kelas dunia.</p><img src="https://web-cms.inka.co.id/uploads/DSC_08666_5438ccccd6.jpg" alt="Lokomotif UGL Tampak Depan" class="feature-image"><h3>Dampak Strategis bagi Indonesia</h3><p>Keberhasilan ekspor ini memperkuat posisi Indonesia di pasar global sebagai negara produsen sarana perkeretaapian yang kompeten. Proyek ini tidak hanya meningkatkan devisa negara, tetapi juga mendorong transfer teknologi dan peningkatan kualitas sumber daya manusia di dalam negeri.</p></div></div>
                 </div>
+                
                 <div id="page-drawing" class="page-content">
-                    <div class="drawing-header">
-                        <h1>Drawing Loco Platform UGL</h1>
-                        <button class="usage-btn"><i class="fa-solid fa-question-circle"></i> Petunjuk Penggunaan</button>
-                    </div>
-                    <div class="search-box">
-                        <input type="text" id="drawingSearchInput" placeholder="Cari berdasarkan nama file atau REV...">
-                        <button id="drawingSearchBtn"><i class="fa-solid fa-search"></i> Cari</button>
-                    </div>
-                    <div class="drawing-table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th><input type="checkbox"></th>
-                                    <th>Nama File</th>
-                                    <th>REV</th>
-                                    <th>Link PDF</th>
-                                </tr>
-                            </thead>
-                            <tbody id="drawingTableBody">
-                                <tr>
-                                    <td><input type="checkbox"></td>
-                                    <td>LCA-064-00-R0256 - Platform P11-006 Draft Gear Pockets.pdf</td>
-                                    <td>R0256</td>
-                                    <td><a href="#">Buka File</a></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox"></td>
-                                    <td>A310-06229-S1-A - DRAFT GEAR POCKET WEB.pdf</td>
-                                    <td>A</td>
-                                    <td><a href="#">Buka File</a></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="checkbox"></td>
-                                    <td>P310-03447-S1-C - DRAFT GEAR POCKET WEB ASSEMBLY.pdf</td>
-                                    <td>C</td>
-                                    <td><a href="#">Buka File</a></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="drawing-panel">
+                        <div class="drawing-header">
+                            <h1>Drawing Loco Platform UGL</h1>
+                            <button class="usage-btn" id="openHelpBtn">📘 Petunjuk Penggunaan</button>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="drawingSearchInput" placeholder="Masukkan nama atau kode file (contoh: UF-C44 atau Side Sill)">
+                            <button id="drawingSearchBtn"><i class="fa-solid fa-search"></i></button>
+                        </div>
+                        <div id="loading-status"></div>
+                        <div id="selectedFilesContainer"></div>
+                        <div class="drawing-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th><div class="custom-checkbox"><input type="checkbox" id="selectAllCheckbox"><label for="selectAllCheckbox"></label></div></th>
+                                        <th class="sortable" data-sort="name">Nama File <span></span></th>
+                                        <th class="sortable" data-sort="revisi">REV <span></span></th>
+                                        <th>Link PDF</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="drawingTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div class="export-area" id="exportArea"><button class="export-btn">📥 Export File Terpilih (.xlsx)</button></div>
                     </div>
                 </div>
-
             </main>
-
             <footer class="main-footer">
-                <div class="footer-left">Copyright &copy; 2025. Inspector Loco</div>
+                <div class="footer-left">Copyright &copy; 2025. Inspector Loco Platform</div>
                 <div class="footer-right">50 Locomotive Platform C44ESACi EVO Project</div>
             </footer>
         </div>
     </div>
-
+    <div id="helpModal" class="popup-overlay">
+        <div class="popup-content">
+            <span class="close-btn" id="closeHelpBtn">✖</span>
+            <h3>📘 Petunjuk Penggunaan</h3>
+            <ul style="padding-left: 20px; line-height: 1.8;">
+                <li><strong>Pencarian:</strong> Ketik nama atau kode file untuk memfilter daftar. Pencarian akan otomatis menampilkan revisi terakhir dari setiap file.</li>
+                <li><strong>Seleksi:</strong> Centang kotak di sebelah kiri untuk memilih file. Gunakan kotak centang di header untuk memilih semua file yang terlihat di tabel.</li>
+                <li><strong>Ekspor:</strong> Setelah memilih file, tombol "Export" akan muncul untuk mengunduh daftar pilihan Anda sebagai file Excel.</li>
+                <li><strong>Sorting:</strong> Klik pada header "Nama File" atau "REV" untuk mengurutkan data berdasarkan abjad atau angka.</li>
+            </ul>
+        </div>
+    </div>
+    
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
+        // ===================================
+        // YOUTUBE API PLAYER
+        // ===================================
         var player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
@@ -270,7 +302,22 @@
             event.target.playVideo();
         }
 
+        // ===================================
+        // MAIN DASHBOARD LOGIC
+        // ===================================
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Variabel Global ---
+            const dashboardContainer = document.querySelector('.dashboard-container');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentPages = document.querySelectorAll('.page-content');
+            const allNavItems = document.querySelectorAll('.main-navigation ul li');
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebarOverlay = document.querySelector('.sidebar-overlay');
+            const logoutButton = document.querySelector('.logout-btn');
+            const mobileBreakpoint = 992;
+            
+            // --- FITUR 1: User Authentication & Data Display ---
             const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             if (!loggedInUser) {
                 window.location.href = 'index.html';
@@ -287,10 +334,8 @@
             } else if (loggedInUser.posisi === 'Guest') {
                 statusWrapper.classList.add('status-guest');
             }
-            const dashboardContainer = document.querySelector('.dashboard-container');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const contentPages = document.querySelectorAll('.page-content');
-            const allNavItems = document.querySelectorAll('.main-navigation ul li');
+
+            // --- FITUR 2: Page Navigation ---
             navLinks.forEach(link => {
                 link.addEventListener('click', function(event) {
                     event.preventDefault();
@@ -304,20 +349,237 @@
                     }
                 });
             });
-            const menuToggle = document.querySelector('.menu-toggle');
-            const sidebarOverlay = document.querySelector('.sidebar-overlay');
-            const logoutButton = document.querySelector('.logout-btn');
-            const mobileBreakpoint = 992; 
-            function handleMenuToggle() { if (window.innerWidth < mobileBreakpoint) { dashboardContainer.classList.toggle('sidebar-mobile-open'); } else { dashboardContainer.classList.toggle('sidebar-collapsed'); } }
+
+            // --- FITUR 3: Hamburger Menu & Sidebar Toggle ---
+            function handleMenuToggle() { 
+                if (window.innerWidth < mobileBreakpoint) { 
+                    dashboardContainer.classList.toggle('sidebar-mobile-open'); 
+                } else { 
+                    dashboardContainer.classList.toggle('sidebar-collapsed'); 
+                } 
+            }
             if (menuToggle) { menuToggle.addEventListener('click', handleMenuToggle); }
             if (sidebarOverlay) { sidebarOverlay.addEventListener('click', handleMenuToggle); }
             window.addEventListener('resize', () => { if (window.innerWidth >= mobileBreakpoint) { dashboardContainer.classList.remove('sidebar-mobile-open'); } });
-            if (logoutButton) { logoutButton.addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; }); }
+
+            // --- FITUR 4: Logout ---
+            if (logoutButton) { 
+                logoutButton.addEventListener('click', (e) => { 
+                    e.preventDefault(); 
+                    localStorage.removeItem('loggedInUser'); 
+                    window.location.href = 'index.html'; 
+                }); 
+            }
+
+            // --- FITUR 5: Pencarian Drawing (Sempurna & Canggih) ---
+            const SCRIPT_URL_DRAWING = "https://script.google.com/macros/s/AKfycbzzalNfheLafED-cI2hpqPYoXmrt_BKkbjKQQ7gBDICTptFItDk7llMBSFrlaI_cfwHKA/exec"; 
+            const tableBody = document.getElementById('drawingTableBody');
+            const searchInput = document.getElementById('drawingSearchInput');
+            const searchBtn = document.getElementById('drawingSearchBtn');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const selectedFilesContainer = document.getElementById('selectedFilesContainer');
+            const exportArea = document.getElementById('exportArea');
+            const loadingStatus = document.getElementById('loading-status');
+            let allDrawingData = [];
+            const selectedFiles = new Map();
+            let sortState = { column: 'name', asc: true };
+            let isDataFetched = false;
+
+            async function fetchDrawingData() {
+                loadingStatus.innerHTML = `<div class="loader-bar"></div><p>Memindai Google Drive...</p>`;
+                loadingStatus.style.display = 'flex';
+                tableBody.innerHTML = '';
+                
+                try {
+                    const response = await fetch(SCRIPT_URL_DRAWING);
+                    allDrawingData = await response.json();
+                    if (allDrawingData.error) throw new Error(allDrawingData.error);
+                    if (!Array.isArray(allDrawingData)) throw new Error("Format data tidak valid");
+                    
+                    isDataFetched = true;
+                    loadingStatus.innerHTML = '✅ Siap digunakan. Silakan mulai pencarian Anda.';
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 40px; color: var(--text-color-light); display:block;">Masukkan kata kunci di atas untuk menampilkan data.</td></tr>`;
+                } catch (error) {
+                    loadingStatus.innerHTML = `⚠️ Gagal memuat data: ${error.message}`;
+                }
+            }
+
+            function renderTable(data) {
+                tableBody.innerHTML = '';
+                if (data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 40px; color: var(--text-color-light); display:block;">Data tidak ditemukan untuk kata kunci Anda.</td></tr>`;
+                    return;
+                }
+                data.forEach((file, index) => {
+                    const fileKey = `${file.name}|${file.revisi}|${file.url}`;
+                    const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
+                    const row = `
+                        <tr>
+                            <td data-label="Pilih"><div class="custom-checkbox"><input type="checkbox" id="cb-${index}" class="item-check" data-key="${fileKey}" ${isChecked}><label for="cb-${index}"></label></div></td>
+                            <td data-label="Nama File">${file.name}</td>
+                            <td data-label="REV">${file.revisi}</td>
+                            <td data-label="Link PDF"><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            function filterAndRender() {
+                if (!isDataFetched) { alert("Data belum selesai dimuat. Harap tunggu."); return; }
+                loadingStatus.style.display = 'none';
+                
+                const keyword = searchInput.value.trim().toLowerCase();
+                if (!keyword) {
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-color-light); display:block;">Masukkan kata kunci untuk menampilkan data.</td></tr>`;
+                    return;
+                }
+
+                const filtered = allDrawingData.filter(item => 
+                    (item.name && item.name.toLowerCase().includes(keyword)) ||
+                    (item.nama_file && item.nama_file.toLowerCase().includes(keyword))
+                );
+                
+                const latestRevisions = {};
+                filtered.forEach(file => {
+                    const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
+                    const revStr = String(file.revisi).trim();
+                    const revCompare = /^[A-Z]$/.test(revStr) ? revStr.charCodeAt(0) : (parseInt(revStr) || 0);
+                    if (!latestRevisions[key] || revCompare > latestRevisions[key].revCompare) {
+                        latestRevisions[key] = { ...file, revCompare };
+                    }
+                });
+
+                let dataToRender = Object.values(latestRevisions);
+                
+                if (sortState.column) {
+                    dataToRender.sort((a, b) => {
+                        let aVal = a[sortState.column] || '';
+                        let bVal = b[sortState.column] || '';
+                        if (sortState.column === 'revisi') { aVal = a.revCompare; bVal = b.revCompare; }
+                        if (aVal < bVal) return sortState.asc ? -1 : 1;
+                        if (aVal > bVal) return sortState.asc ? 1 : -1;
+                        return 0;
+                    });
+                }
+                renderTable(dataToRender);
+                updateSelectedList();
+                updateSortIndicators();
+            }
+            
+            function updateSortIndicators() {
+                document.querySelectorAll('th.sortable span').forEach(span => span.textContent = '');
+                const activeTh = document.querySelector(`th.sortable[data-sort="${sortState.column}"]`);
+                if (activeTh) {
+                    activeTh.querySelector('span').textContent = sortState.asc ? " ▲" : " ▼";
+                }
+            }
+            
+            function updateSelectedList() {
+                selectedFilesContainer.innerHTML = '';
+                exportArea.style.display = 'none';
+                if (selectedFiles.size > 0) {
+                    exportArea.style.display = 'block';
+                    let html = `
+                        <div class="drawing-table-container" style="border: 1px solid var(--border-color); border-radius: 12px; margin-top: 30px;">
+                            <h3 style="padding: 20px 20px 0; font-size: 1.2em; color: var(--secondary-color);">📌 File Terpilih (${selectedFiles.size})</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama File</th>
+                                        <th>REV</th>
+                                        <th>Hapus</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                    selectedFiles.forEach((file, key) => {
+                        html += `
+                                    <tr>
+                                        <td data-label="Nama File">${file.name}</td>
+                                        <td data-label="REV">${file.revisi}</td>
+                                        <td data-label="Hapus"><button class="delete-selected" data-key="${key}" style="background:none;border:none;cursor:pointer;color:red;font-size:1.2em;">✖</button></td>
+                                    </tr>`;
+                    });
+                    html += `       </tbody>
+                            </table>
+                        </div>`;
+                    selectedFilesContainer.innerHTML = html;
+                }
+            }
+
+            function exportToExcel() {
+                if (selectedFiles.size === 0) { alert("❗ Pilih minimal satu file terlebih dahulu."); return; }
+                const data = [["Nama File", "REV", "Link PDF"]];
+                selectedFiles.forEach(file => data.push([file.name, file.revisi, file.url]));
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "File Terpilih");
+                XLSX.writeFile(wb, "file_terpilih.xlsx");
+            }
+
+            searchBtn.addEventListener('click', filterAndRender);
+            searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') filterAndRender(); });
+            
+            document.querySelector('#page-drawing thead').addEventListener('click', (e) => {
+                const th = e.target.closest('th.sortable');
+                if (th) {
+                    const column = th.dataset.sort;
+                    if (sortState.column === column) {
+                        sortState.asc = !sortState.asc;
+                    } else {
+                        sortState.column = column;
+                        sortState.asc = true;
+                    }
+                    filterAndRender();
+                }
+            });
+
+            document.getElementById('drawingTableBody').addEventListener('change', (e) => {
+                if (e.target.classList.contains('item-check')) {
+                    const checkbox = e.target;
+                    const key = checkbox.dataset.key;
+                    const [name, revisi, url] = key.split('|');
+                    if (checkbox.checked) {
+                        selectedFiles.set(key, { name, revisi, url });
+                    } else {
+                        selectedFiles.delete(key);
+                    }
+                    updateSelectedList();
+                }
+            });
+            
+            selectedFilesContainer.addEventListener('click', (e) => {
+                if(e.target.classList.contains('delete-selected')) {
+                    const key = e.target.dataset.key;
+                    selectedFiles.delete(key);
+                    selectAllCheckbox.checked = false;
+                    updateSelectedList();
+                    filterAndRender();
+                }
+            });
+
+            selectAllCheckbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                document.querySelectorAll('#drawingTableBody .item-check').forEach(cb => {
+                    if (cb.checked !== isChecked) {
+                        cb.checked = isChecked;
+                        cb.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+            
+            exportArea.addEventListener('click', exportToExcel);
+
+            const helpModal = document.getElementById('helpModal');
+            document.getElementById('openHelpBtn').addEventListener('click', () => helpModal.style.display = 'flex');
+            document.getElementById('closeHelpBtn').addEventListener('click', () => helpModal.style.display = 'none');
+            helpModal.addEventListener('click', (e) => { if(e.target === helpModal) helpModal.style.display = 'none'; });
+
+            document.querySelector('.nav-link[data-page="page-drawing"]').addEventListener('click', () => {
+                if (!isDataFetched) {
+                    fetchDrawingData();
+                }
+            });
         });
     </script>
 </body>
-
 </html>
-
-
-
