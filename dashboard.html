@@ -45,7 +45,7 @@
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; }
 
         /* ==================================
-           3. SIDEBAR COMPONENTS
+           3. SIDEBAR & TOPBAR COMPONENTS
            ================================== */
         .sidebar-logos { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
         .sidebar-logos .logo-left img { height: 18px; margin-right: 15px; }
@@ -63,10 +63,6 @@
         .main-navigation ul li a i { margin-right: 15px; width: 20px; text-align: center; font-size: 0.9em; }
         .status-inspector { color: var(--status-inspector-color); }
         .status-guest { color: var(--status-guest-color); }
-
-        /* ==================================
-           4. TOPBAR & HEADER
-           ================================== */
         .topbar { background-color: var(--sidebar-bg); color: var(--text-color); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
         .header-left, .header-right { display: flex; align-items: center; }
         .menu-toggle { background: none; border: none; color: var(--text-color); font-size: 1.2em; cursor: pointer; margin-right: 15px; }
@@ -77,7 +73,7 @@
         .logout-btn i { margin-right: 5px; }
 
         /* ==================================
-           5. CONTENT AREA & PAGES
+           4. CONTENT AREA & PAGES
            ================================== */
         .content-wrapper { flex-grow: 1; }
         .page-content { display: none; }
@@ -121,10 +117,10 @@
         .loader-bar { width: 100px; height: 4px; background-color: var(--border-color); border-radius: 2px; overflow: hidden; }
         .loader-bar::before { content: ''; display: block; width: 40%; height: 100%; background-color: var(--blue-color); border-radius: 2px; animation: loading-bar-animation 1.5s infinite; }
         @keyframes loading-bar-animation { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
-        .drawing-table-container { overflow-x: auto; margin-bottom: 20px; }
+        .drawing-table-container { overflow-x: auto; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 12px; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
         .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .data-table td:nth-child(2) { white-space: normal; word-break: break-word; min-width: 250px; }
+        .data-table td:nth-child(2) { white-space: normal; word-break: break-all; min-width: 250px; }
         .data-table thead th { font-weight: 500; text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.5px; color: var(--text-color-light); background-color: #f8f9fa; white-space: nowrap; }
         .data-table tbody tr:hover { background-color: #f8f9fa; }
         .data-table a { color: var(--blue-color); font-weight: 500; }
@@ -137,7 +133,7 @@
         .custom-checkbox input:checked + label { background-color: var(--blue-color); border-color: var(--blue-color); }
         .custom-checkbox input:checked + label::after { content: '✔'; color: white; font-size: 12px; position: absolute; top: 1px; left: 3px; }
         #selectedFilesContainer { margin-bottom: 30px; }
-        #selectedFilesContainer h3 { margin-bottom: 15px; font-size: 1.2em; color: var(--secondary-color); }
+        #selectedFilesContainer h3 { margin-bottom: 15px; padding: 20px 20px 0; font-size: 1.2em; color: var(--secondary-color); }
         .export-area { text-align: center; margin-top: 20px; display: none; }
         .export-btn { background-color: #28a745; color: white; font-size: 16px; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
         .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; }
@@ -145,12 +141,12 @@
         .close-btn { position: absolute; top: 12px; right: 16px; font-size: 20px; cursor: pointer; color: #555; }
 
         /* ==================================
-           6. FOOTER
+           5. FOOTER
            ================================== */
         .main-footer { padding: 20px 30px; font-size: 0.9em; color: var(--text-color-light); display: flex; justify-content: space-between; background-color: var(--sidebar-bg); }
 
         /* ==================================
-           7. RESPONSIVE DESIGN
+           6. RESPONSIVE DESIGN
            ================================== */
         @media (max-width: 991.98px) {
             .sidebar { transform: translateX(-100%); }
@@ -162,7 +158,6 @@
             .home-content h1 { font-size: 2.5em; }
             .home-content p { font-size: 1.1em; }
             
-            /* == PERBAIKAN CSS TABEL MOBILE == */
             .drawing-table-container { border: none; }
             .data-table thead { display: none; }
             .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
@@ -190,9 +185,20 @@
             .data-table td:last-child {
                 border-bottom: none;
             }
-            #selectedFilesContainer .data-table td:before { display: none; }
-            #selectedFilesContainer .data-table td { text-align: left; padding-left: 15px; display: table-cell; }
-            #selectedFilesContainer .data-table tr { display: table-row; border: none; margin-bottom: 0; background: none; }
+            #selectedFilesContainer .data-table td:before {
+                display: none;
+            }
+            #selectedFilesContainer .data-table td {
+                text-align: left;
+                padding-left: 15px;
+                display: table-cell;
+            }
+            #selectedFilesContainer .data-table tr {
+                display: table-row;
+                border: none;
+                margin-bottom: 0;
+                background: none;
+            }
         }
     </style>
 </head>
@@ -438,7 +444,7 @@
                 
                 const keyword = searchInput.value.trim().toLowerCase();
                 if (!keyword) {
-                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-color-light);">Masukkan kata kunci untuk menampilkan data.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-color-light); display:block;">Masukkan kata kunci untuk menampilkan data.</td></tr>`;
                     return;
                 }
 
@@ -487,7 +493,18 @@
                 exportArea.style.display = 'none';
                 if (selectedFiles.size > 0) {
                     exportArea.style.display = 'block';
-                    let html = `<div class="drawing-table-container" style="border: 1px solid var(--border-color); border-radius: 12px; margin-top: 30px;"><h3 style="padding: 20px 20px 0; font-size: 1.2em; color: var(--secondary-color);">📌 File Terpilih (${selectedFiles.size})</h3><table class="data-table"><thead><tr><th>Nama File</th><th>REV</th><th>Hapus</th></tr></thead><tbody>`;
+                    let html = `
+                        <div class="drawing-table-container" style="border: 1px solid var(--border-color); border-radius: 12px; margin-top: 30px;">
+                            <h3 style="padding: 20px 20px 0; font-size: 1.2em; color: var(--secondary-color);">📌 File Terpilih (${selectedFiles.size})</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama File</th>
+                                        <th>REV</th>
+                                        <th>Hapus</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
                     selectedFiles.forEach((file, key) => {
                         html += `
                                     <tr>
